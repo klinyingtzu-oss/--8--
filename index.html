@@ -3,107 +3,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的旅遊手冊</title>
+    <title>日本8日遊行程表</title>
     <style>
-        :root { --main-color: #4a90e2; --bg-color: #f4f4f9; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg-color); margin: 0; padding-bottom: 50px; }
+        :root {
+            --primary: #1a4d8f; /* 質感深藍 */
+            --secondary: #eef2f7;
+            --text-dark: #333;
+        }
+
+        body { font-family: -apple-system, "Helvetica Neue", sans-serif; margin: 0; background: #f8f9fa; color: var(--text-dark); }
         
-        /* 換色控制項 */
-        .theme-picker { padding: 10px; background: #fff; display: flex; gap: 10px; justify-content: center; }
-        .dot { width: 25px; height: 25px; border-radius: 50%; border: 2px solid #ddd; cursor: pointer; }
+        /* 頂部大標題 */
+        .header { background: var(--primary); color: white; padding: 25px 20px; text-align: center; }
+        .header h1 { margin: 0; font-size: 1.5rem; letter-spacing: 2px; }
+        
+        /* 住宿資訊區 */
+        .stay-info { background: #fff; padding: 12px 20px; border-bottom: 1px solid #ddd; display: flex; align-items: center; gap: 8px; font-size: 0.9rem; }
+        .stay-label { background: var(--primary); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; }
 
         /* 天數導覽 */
-        .nav { position: sticky; top: 0; background: white; display: flex; overflow-x: auto; border-bottom: 1px solid #ddd; z-index: 100; }
-        .nav-item { padding: 15px 20px; white-space: nowrap; cursor: pointer; transition: 0.3s; }
-        .nav-item.active { color: var(--main-color); border-bottom: 3px solid var(--main-color); font-weight: bold; }
+        .nav-container { position: sticky; top: 0; background: white; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .nav { display: flex; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .nav-item { padding: 15px 25px; white-space: nowrap; cursor: pointer; text-align: center; border-bottom: 3px solid transparent; }
+        .nav-item.active { border-bottom: 3px solid var(--primary); color: var(--primary); font-weight: bold; }
+        .nav-date { display: block; font-size: 0.7rem; color: #888; margin-top: 2px; }
 
-        /* 行程卡片 (直列) */
-        .timeline { padding: 15px; }
-        .card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 5px solid var(--main-color); }
-        .time { color: var(--main-color); font-weight: bold; font-size: 0.9em; margin-bottom: 5px; }
-        .loc { font-size: 1.2em; font-weight: bold; margin-bottom: 8px; }
-        .note { font-size: 0.9em; color: #555; white-space: pre-wrap; line-height: 1.5; background: #f9f9f9; padding: 8px; border-radius: 5px; }
-        .btns { margin-top: 10px; display: flex; gap: 10px; }
-        .btn { padding: 8px 15px; border-radius: 20px; text-decoration: none; font-size: 0.8em; color: white; background: var(--main-color); }
+        /* 行程直列列表 */
+        .timeline { padding: 20px; max-width: 600px; margin: 0 auto; }
+        .event { display: flex; margin-bottom: 20px; position: relative; }
+        
+        /* 左側時間線 */
+        .time-box { width: 60px; font-size: 0.85rem; font-weight: bold; color: var(--primary); padding-top: 5px; flex-shrink: 0; }
+        
+        /* 右側卡片 */
+        .card { flex-grow: 1; background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .loc-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 8px; display: block; }
+        .note { font-size: 0.9rem; color: #666; white-space: pre-wrap; line-height: 1.6; border-top: 1px dashed #eee; pt: 8px; margin-top: 8px; padding-top: 8px; }
+        
+        /* 地圖按鈕 */
+        .map-btn { display: inline-flex; align-items: center; margin-top: 12px; color: var(--primary); text-decoration: none; font-size: 0.85rem; font-weight: bold; border: 1px solid var(--primary); padding: 5px 12px; border-radius: 20px; }
         
         /* 離線提示 */
-        .offline-tip { background: #fff3cd; text-align: center; padding: 5px; font-size: 0.8em; display: none; }
+        #offlineNotice { background: #fff3cd; color: #856404; text-align: center; padding: 8px; font-size: 0.8rem; display: none; }
     </style>
 </head>
 <body>
 
-    <div class="offline-tip" id="offlineMsg">⚠️ 目前為離線模式，顯示最後一次更新的內容</div>
+<div class="header">
+    <h1>🇯🇵 東京五天四夜之旅</h1> </div>
 
-    <div class="theme-picker">
-        <div class="dot" style="background:#4a90e2" onclick="changeColor('#4a90e2')"></div>
-        <div class="dot" style="background:#e67e22" onclick="changeColor('#e67e22')"></div>
-        <div class="dot" style="background:#27ae60" onclick="changeColor('#27ae60')"></div>
-        <div class="dot" style="background:#e91e63" onclick="changeColor('#e91e63')"></div>
+<div id="offlineNotice">⚠️ 目前為離線瀏覽，顯示舊有行程數據</div>
+
+<div class="stay-info" id="stayDisplay">
+    <span class="stay-label">今日住宿</span>
+    <span id="stayName">載入中...</span>
+</div>
+
+<div class="nav-container">
+    <div class="nav" id="dayNav"></div>
+</div>
+
+<div class="timeline" id="itinerary">
     </div>
 
-    <div class="nav" id="dayNav"></div>
-    <div class="timeline" id="content">讀取行程中...</div>
+<script>
+    const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQvJrfnAiYw3-NvbrcoKJeZZiwv981LT-dibEqvirgdfJZbXSEk5bS-KVsUaW2AuDS3K6F0uKK3Vg-E/pub?output=csv'; 
+    let travelData = [];
 
-    <script>
-        // 【重要】請把下方網址替換成你從 Google 試算表複製的 CSV 網址
-        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQvJrfnAiYw3-NvbrcoKJeZZiwv981LT-dibEqvirgdfJZbXSEk5bS-KVsUaW2AuDS3K6F0uKK3Vg-E/pub?output=csv'; 
-        let allData = [];
-
-        async function fetchData() {
-            try {
-                const response = await fetch(SHEET_URL);
-                const data = await response.text();
-                parseCSV(data);
-                localStorage.setItem('travel_cache', data); // 儲存供離線使用
-            } catch (e) {
-                const cache = localStorage.getItem('travel_cache');
-                if(cache) {
-                    parseCSV(cache);
-                    document.getElementById('offlineMsg').style.display = 'block';
-                }
+    async function loadData() {
+        try {
+            const res = await fetch(SHEET_CSV_URL);
+            const text = await res.text();
+            localStorage.setItem('myTravelData', text);
+            processData(text);
+        } catch (err) {
+            const cached = localStorage.getItem('myTravelData');
+            if(cached) {
+                processData(cached);
+                document.getElementById('offlineNotice').style.display = 'block';
             }
         }
+    }
 
-        function parseCSV(csvText) {
-            const rows = csvText.split('\n').slice(1);
-            allData = rows.map(row => {
-                const cols = row.split(',');
-                return { day: cols[0], time: cols[1], loc: cols[2], note: cols[3], url: cols[4], map: cols[5] };
-            });
-            renderNav();
-            renderDay(allData[0].day);
-        }
+    function processData(csv) {
+        const lines = csv.split('\n').filter(line => line.trim() !== "");
+        // 假設第一行是標題，從第二行開始解析
+        travelData = lines.slice(1).map(line => {
+            const cells = line.split(',');
+            return {
+                day: cells[0]?.trim(),
+                date: cells[1]?.trim(),
+                stay: cells[2]?.trim(),
+                time: cells[3]?.trim(),
+                loc: cells[4]?.trim(),
+                note: cells[5]?.replace(/"/g, '').trim(), // 去除引號
+                map: cells[6]?.trim()
+            };
+        });
+        
+        renderNav();
+        const firstDay = [...new Set(travelData.map(d => d.day))][0];
+        showDay(firstDay);
+    }
 
-        function renderNav() {
-            const days = [...new Set(allData.map(d => d.day))];
-            const nav = document.getElementById('dayNav');
-            nav.innerHTML = days.map((d, i) => `<div class="nav-item ${i===0?'active':''}" onclick="renderDay('${d}', this)">Day ${d}</div>`).join('');
-        }
+    function renderNav() {
+        const nav = document.getElementById('dayNav');
+        const uniqueDays = [];
+        const dayMap = new Map();
 
-        function renderDay(day, el) {
-            if(el) {
-                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-                el.classList.add('active');
+        travelData.forEach(item => {
+            if(!dayMap.has(item.day)) {
+                dayMap.set(item.day, item.date);
+                uniqueDays.push(item.day);
             }
-            const filtered = allData.filter(d => d.day === day);
-            document.getElementById('content').innerHTML = filtered.map(item => `
+        });
+
+        nav.innerHTML = uniqueDays.map((d, index) => `
+            <div class="nav-item ${index === 0 ? 'active' : ''}" onclick="selectDay(this, '${d}')">
+                Day ${d}
+                <span class="nav-date">${dayMap.get(d)}</span>
+            </div>
+        `).join('');
+    }
+
+    function selectDay(element, day) {
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        element.classList.add('active');
+        showDay(day);
+    }
+
+    function showDay(day) {
+        const container = document.getElementById('itinerary');
+        const dayItems = travelData.filter(item => item.day === day);
+        
+        // 更新住宿顯示
+        document.getElementById('stayName').innerText = dayItems[0]?.stay || '未設定';
+
+        // 更新行程列表
+        container.innerHTML = dayItems.map(item => `
+            <div class="event">
+                <div class="time-box">${item.time}</div>
                 <div class="card">
-                    <div class="time">${item.time}</div>
-                    <div class="loc">${item.loc}</div>
+                    <span class="loc-title">${item.loc}</span>
                     ${item.note ? `<div class="note">${item.note}</div>` : ''}
-                    <div class="btns">
-                        ${item.url ? `<a class="btn" href="${item.url}" target="_blank">官網/預約</a>` : ''}
-                        ${item.map ? `<a class="btn" href="${item.map}" target="_blank">🗺️ 查看地圖</a>` : ''}
-                    </div>
+                    ${item.map ? `<a href="${item.map}" target="_blank" class="map-btn">📍 開啟地圖</a>` : ''}
                 </div>
-            `).join('');
-        }
+            </div>
+        `).join('');
+    }
 
-        function changeColor(color) {
-            document.documentElement.style.setProperty('--main-color', color);
-        }
+    loadData();
+</script>
 
-        fetchData();
-    </script>
 </body>
 </html>
