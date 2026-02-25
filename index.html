@@ -8,196 +8,132 @@
         :root {
             --primary-blue: #1a4d8f;
             --light-blue: #f0f4f8;
+            --transport-bg: #ececec;
+            --note-bg: #f8f9fa;
             --white: #ffffff;
         }
 
         body { 
             font-family: -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif; 
-            margin: 0; 
-            background: #f7f9fc; 
-            color: #333; 
+            margin: 0; background: #f2f4f7; color: #333; line-height: 1.5;
         }
 
-        /* 固定置頂 */
+        /* 置頂區域 */
         .header-fixed {
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            background: var(--primary-blue);
-            color: white;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            position: sticky; top: 0; z-index: 1000;
+            background: var(--primary-blue); color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
-
-        .trip-main-info {
-            padding: 15px 20px 5px 20px;
-            text-align: center;
-        }
-
-        .trip-main-info h1 { margin: 0; font-size: 1.3rem; letter-spacing: 1px; }
-
-        /* 置頂資訊欄位 */
+        .trip-main-info { padding: 15px 20px 5px 20px; text-align: center; }
+        .trip-main-info h1 { margin: 0; font-size: 1.2rem; letter-spacing: 1px; }
         .top-info-bar {
             background: rgba(255, 255, 255, 0.1);
-            margin: 10px 15px 15px 15px;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 0.9rem;
+            margin: 10px 15px 15px 15px; padding: 10px; border-radius: 8px; font-size: 0.85rem;
         }
-        .info-row { 
-            display: flex; 
-            margin-bottom: 5px;
-            justify-content: flex-start;
-        }
-        .info-label { width: 80px; flex-shrink: 0; opacity: 0.9; }
-        .info-value { font-weight: 500; }
+        .info-row { display: flex; margin-bottom: 4px; }
+        .info-label { width: 75px; flex-shrink: 0; opacity: 0.8; }
 
         /* 天數切換 */
-        .day-nav {
-            display: flex;
-            overflow-x: auto;
-            background: var(--white);
-            border-bottom: 1px solid #ddd;
-        }
+        .day-nav { display: flex; overflow-x: auto; background: var(--white); border-bottom: 1px solid #ddd; }
         .day-tab {
-            flex: 1;
-            min-width: 80px;
-            padding: 15px 0;
-            text-align: center;
-            color: #666;
-            cursor: pointer;
-            font-weight: bold;
-            border-bottom: 3px solid transparent;
+            flex: 1; min-width: 70px; padding: 12px 0; text-align: center;
+            color: #777; cursor: pointer; font-weight: bold; border-bottom: 3px solid transparent; font-size: 0.9rem;
         }
-        .day-tab.active {
-            color: var(--primary-blue);
-            border-bottom: 3px solid var(--primary-blue);
-            background: #f9fbff;
-        }
+        .day-tab.active { color: var(--primary-blue); border-bottom: 3px solid var(--primary-blue); background: #f9fbff; }
 
         /* 行程內容 */
         .timeline { padding: 15px; max-width: 500px; margin: 0 auto; }
+        
         .event-card {
-            display: flex;
-            margin-bottom: 15px;
-            background: var(--white);
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            border: 1px solid #eee;
-            min-height: 80px;
+            display: flex; background: var(--white); border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05); border: 1px solid #eee; overflow: hidden;
         }
         .time-label {
-            width: 65px;
-            background: var(--light-blue);
-            color: var(--primary-blue);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 0.85rem;
-            flex-shrink: 0;
+            width: 55px; background: var(--light-blue); color: var(--primary-blue);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 0.8rem; flex-shrink: 0;
         }
-        .content-body { padding: 15px; flex-grow: 1; }
-        .loc-name { font-size: 1.1rem; font-weight: bold; margin-bottom: 5px; }
-        .note-box { 
-            font-size: 0.9rem; 
-            color: #555; 
-            white-space: pre-wrap; 
-            background: #fcfcfc;
-            padding: 8px;
-            border-radius: 4px;
-            margin: 5px 0;
-        }
-        .map-btn {
-            display: inline-block;
-            margin-top: 8px;
-            color: var(--primary-blue);
-            text-decoration: none;
-            font-size: 0.8rem;
-            font-weight: bold;
-            border: 1px solid var(--primary-blue);
-            padding: 4px 12px;
-            border-radius: 4px;
+        .content-body { padding: 12px 15px; flex-grow: 1; }
+        .loc-name { font-size: 1.05rem; font-weight: bold; margin-bottom: 8px; color: #000; }
+
+        /* 多組備註區分 */
+        .note-container { display: flex; flex-direction: column; gap: 6px; margin: 8px 0; }
+        .note-item { 
+            font-size: 0.85rem; color: #444; 
+            background: var(--note-bg); 
+            padding: 6px 10px; border-radius: 6px; 
+            border-left: 3px solid #ddd;
         }
 
-        #offline-status { background: #fff3cd; color: #856404; text-align: center; font-size: 0.75rem; padding: 4px; display: none; }
+        .map-btn {
+            display: inline-block; margin-top: 5px; color: var(--primary-blue);
+            text-decoration: none; font-size: 0.75rem; font-weight: bold;
+            border: 1px solid var(--primary-blue); padding: 4px 12px; border-radius: 15px;
+        }
+
+        /* 交通區塊 */
+        .transport-divider {
+            margin: 0 0 0 25px; padding: 10px 0 10px 35px;
+            border-left: 2px dashed #cbd5e0; position: relative;
+        }
+        .transport-info {
+            display: inline-flex; align-items: center; font-size: 0.8rem;
+            background: var(--transport-bg); color: #666;
+            padding: 3px 12px; border-radius: 12px;
+        }
+
+        #offline-status { background: #fff3cd; color: #856404; text-align: center; font-size: 0.7rem; padding: 4px; display: none; }
     </style>
 </head>
 <body>
 
 <div class="header-fixed">
-    <div id="offline-status">離線模式：顯示舊有資料</div>
-    <div class="trip-main-info">
-        <h1 id="trip-title">日本8日遊行程</h1>
-    </div>
-    
+    <div id="offline-status">離線模式：顯示快取行程</div>
+    <div class="trip-main-info"><h1>日本8日遊行程</h1></div>
     <div class="top-info-bar">
-        <div class="info-row">
-            <span class="info-label">日期：</span>
-            <span id="display-date">載入中...</span>
-        </div>
-        <div class="info-row">
-            <span class="info-label">住宿地點：</span>
-            <span id="display-stay">載入中...</span>
-        </div>
+        <div class="info-row"><span class="info-label">日期：</span><span id="display-date">-</span></div>
+        <div class="info-row"><span class="info-label">住宿地點：</span><span id="display-stay">-</span></div>
     </div>
-
     <div class="day-nav" id="dayNav"></div>
 </div>
 
 <div class="timeline" id="itineraryContent"></div>
 
 <script>
-    // 請將此處替換為你的 CSV 網址
-    const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQvJrfnAiYw3-NvbrcoKJeZZiwv981LT-dibEqvirgdfJZbXSEk5bS-KVsUaW2AuDS3K6F0uKK3Vg-E/pub?output=csv';
-
+    const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQvJrfnAiYw3-NvbrcoKJeZZiwv981LT-dibEqvirgdfJZbXSEk5bS-KVsUaW2AuDS3K6F0uKK3Vg-E/pub?output=csv'; 
     let travelData = [];
 
     async function fetchData() {
         try {
             const response = await fetch(SHEET_CSV_URL);
             const csvText = await response.text();
-            localStorage.setItem('my_trip_cache', csvText);
+            localStorage.setItem('trip_v3_cache', csvText);
             render(csvText);
         } catch (e) {
-            const cache = localStorage.getItem('my_trip_cache');
-            if (cache) {
-                render(cache);
-                document.getElementById('offline-status').style.display = 'block';
-            }
+            const cache = localStorage.getItem('trip_v3_cache');
+            if (cache) { render(cache); document.getElementById('offline-status').style.display = 'block'; }
         }
     }
 
     function render(csvData) {
         const rows = csvData.split('\n').filter(r => r.trim() !== "");
         travelData = rows.slice(1).map(row => {
-            const cols = row.split(',');
+            const c = row.split(',');
             return {
-                day: cols[0]?.trim(),
-                date: cols[1]?.trim(),
-                stay: cols[2]?.trim(),
-                time: cols[3]?.trim(),
-                loc: cols[4]?.trim(),
-                note: cols[5]?.replace(/"/g, '').trim(),
-                map: cols[6]?.trim()
+                day: c[0]?.trim(), date: c[1]?.trim(), stay: c[2]?.trim(),
+                time: c[3]?.trim(), loc: c[4]?.trim(), note: c[5]?.replace(/"/g, '').trim(),
+                map: c[6]?.trim(), trans: c[7]?.trim(), duration: c[8]?.trim()
             };
         });
 
         if (travelData.length > 0) {
-            // 顯示日期（無波浪號，用空白隔開）
-            const firstDate = travelData[0].date;
-            const lastDate = travelData[travelData.length - 1].date;
-            document.getElementById('display-date').innerText = `${firstDate}  ${lastDate}`;
-            
-            // 預設顯示第一天住宿
+            document.getElementById('display-date').innerText = `${travelData[0].date}  ${travelData[travelData.length - 1].date}`;
             document.getElementById('display-stay').innerText = travelData[0].stay;
         }
 
         const uniqueDays = [...new Set(travelData.map(t => t.day))];
         const nav = document.getElementById('dayNav');
-        nav.innerHTML = uniqueDays.map((d, i) => `
-            <div class="day-tab ${i===0?'active':''}" onclick="changeDay('${d}', this)">Day ${d}</div>
-        `).join('');
-
+        nav.innerHTML = uniqueDays.map((d, i) => `<div class="day-tab ${i===0?'active':''}" onclick="changeDay('${d}', this)">Day ${d}</div>`).join('');
         changeDay(uniqueDays[0]);
     }
 
@@ -206,25 +142,39 @@
             document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));
             el.classList.add('active');
         }
-
         const filtered = travelData.filter(t => t.day === day);
-        const container = document.getElementById('itineraryContent');
-        
-        // 切換天數時同步更新當天住宿
-        if(filtered.length > 0) {
-            document.getElementById('display-stay').innerText = filtered[0].stay;
-        }
+        if(filtered.length > 0) document.getElementById('display-stay').innerText = filtered[0].stay;
 
-        container.innerHTML = filtered.map(item => `
-            <div class="event-card">
-                <div class="time-label">${item.time}</div>
-                <div class="content-body">
-                    <div class="loc-name">${item.loc}</div>
-                    ${item.note ? `<div class="note-box">${item.note}</div>` : ''}
-                    ${item.map ? `<a href="${item.map}" target="_blank" class="map-btn">📍 開啟地圖</a>` : ''}
+        let html = '';
+        filtered.forEach((item) => {
+            // 處理多組備註
+            const notes = item.note ? item.note.split(';') : [];
+            const notesHtml = notes.map(n => n.trim() ? `<div class="note-item">${n.trim()}</div>` : '').join('');
+
+            html += `
+                <div class="event-card">
+                    <div class="time-label">${item.time}</div>
+                    <div class="content-body">
+                        <div class="loc-name">${item.loc}</div>
+                        <div class="note-container">${notesHtml}</div>
+                        ${item.map ? `<a href="${item.map}" target="_blank" class="map-btn">📍 查看地圖</a>` : ''}
+                    </div>
                 </div>
-            </div>
-        `).join('');
+            `;
+            
+            if (item.trans || item.duration) {
+                html += `
+                    <div class="transport-divider">
+                        <div class="transport-info">
+                            <span>🚃 ${item.trans}</span>
+                            ${item.duration ? `<b style="margin-left:5px">(${item.duration})</b>` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+        });
+
+        document.getElementById('itineraryContent').innerHTML = html;
         window.scrollTo({top: 0, behavior: 'smooth'});
     }
 
