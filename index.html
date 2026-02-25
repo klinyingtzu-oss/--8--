@@ -3,156 +3,241 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>日本8日遊行程表</title>
+    <title>旅遊行程表</title>
     <style>
         :root {
-            --primary: #1a4d8f; /* 質感深藍 */
-            --secondary: #eef2f7;
-            --text-dark: #333;
+            --primary-blue: #1a4d8f; /* 質感深藍 */
+            --light-blue: #f0f4f8;
+            --accent-blue: #4a90e2;
+            --white: #ffffff;
         }
 
-        body { font-family: -apple-system, "Helvetica Neue", sans-serif; margin: 0; background: #f8f9fa; color: var(--text-dark); }
-        
-        /* 頂部大標題 */
-        .header { background: var(--primary); color: white; padding: 25px 20px; text-align: center; }
-        .header h1 { margin: 0; font-size: 1.5rem; letter-spacing: 2px; }
-        
-        /* 住宿資訊區 */
-        .stay-info { background: #fff; padding: 12px 20px; border-bottom: 1px solid #ddd; display: flex; align-items: center; gap: 8px; font-size: 0.9rem; }
-        .stay-label { background: var(--primary); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; }
+        body { 
+            font-family: -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif; 
+            margin: 0; 
+            background: #f7f9fc; 
+            color: #333; 
+        }
 
-        /* 天數導覽 */
-        .nav-container { position: sticky; top: 0; background: white; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .nav { display: flex; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        .nav-item { padding: 15px 25px; white-space: nowrap; cursor: pointer; text-align: center; border-bottom: 3px solid transparent; }
-        .nav-item.active { border-bottom: 3px solid var(--primary); color: var(--primary); font-weight: bold; }
-        .nav-date { display: block; font-size: 0.7rem; color: #888; margin-top: 2px; }
+        /* 置頂資訊區 */
+        .header-fixed {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: var(--primary-blue);
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
 
-        /* 行程直列列表 */
-        .timeline { padding: 20px; max-width: 600px; margin: 0 auto; }
-        .event { display: flex; margin-bottom: 20px; position: relative; }
-        
-        /* 左側時間線 */
-        .time-box { width: 60px; font-size: 0.85rem; font-weight: bold; color: var(--primary); padding-top: 5px; flex-shrink: 0; }
-        
-        /* 右側卡片 */
-        .card { flex-grow: 1; background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .loc-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 8px; display: block; }
-        .note { font-size: 0.9rem; color: #666; white-space: pre-wrap; line-height: 1.6; border-top: 1px dashed #eee; pt: 8px; margin-top: 8px; padding-top: 8px; }
-        
-        /* 地圖按鈕 */
-        .map-btn { display: inline-flex; align-items: center; margin-top: 12px; color: var(--primary); text-decoration: none; font-size: 0.85rem; font-weight: bold; border: 1px solid var(--primary); padding: 5px 12px; border-radius: 20px; }
-        
-        /* 離線提示 */
-        #offlineNotice { background: #fff3cd; color: #856404; text-align: center; padding: 8px; font-size: 0.8rem; display: none; }
+        .trip-main-info {
+            padding: 20px 20px 15px 20px;
+            text-align: center;
+        }
+
+        .trip-main-info h1 { 
+            margin: 0 0 12px 0; 
+            font-size: 1.4rem; 
+            letter-spacing: 1px; 
+        }
+
+        /* 頂部固定日期與住宿 */
+        .top-info-bar {
+            background: rgba(255, 255, 255, 0.15);
+            margin: 0 15px 15px 15px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .info-row { display: flex; align-items: center; gap: 10px; justify-content: center; }
+        .info-row span { font-weight: 500; }
+
+        /* 天數切換 Tab */
+        .day-nav {
+            display: flex;
+            overflow-x: auto;
+            background: var(--white);
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .day-tab {
+            flex: 1;
+            min-width: 75px;
+            padding: 15px 0;
+            text-align: center;
+            color: #777;
+            cursor: pointer;
+            font-weight: bold;
+            border-bottom: 3px solid transparent;
+            font-size: 0.9rem;
+        }
+        .day-tab.active {
+            color: var(--primary-blue);
+            border-bottom: 3px solid var(--primary-blue);
+            background: #f9fbff;
+        }
+
+        /* 行程列表區 */
+        .timeline { padding: 15px; max-width: 500px; margin: 0 auto; }
+        .event-card {
+            display: flex;
+            margin-bottom: 15px;
+            background: var(--white);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+            border: 1px solid #eee;
+        }
+        .time-label {
+            width: 65px;
+            background: var(--light-blue);
+            color: var(--primary-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+        .content-body { padding: 15px; flex-grow: 1; }
+        .loc-name { font-size: 1.1rem; font-weight: bold; margin-bottom: 6px; color: #111; }
+        .note-box { 
+            font-size: 0.9rem; 
+            color: #666; 
+            white-space: pre-wrap; 
+            line-height: 1.5;
+            background: #fafafa;
+            padding: 8px;
+            border-radius: 6px;
+            margin: 8px 0;
+        }
+        .map-action {
+            display: inline-block;
+            margin-top: 5px;
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: bold;
+            border: 1px solid var(--accent-blue);
+            padding: 5px 12px;
+            border-radius: 20px;
+        }
+
+        /* 離線訊息 */
+        #offline-status { background: #fffae6; color: #856404; text-align: center; font-size: 0.75rem; padding: 4px; display: none; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <h1>🇯🇵 東京五天四夜之旅</h1> </div>
-
-<div id="offlineNotice">⚠️ 目前為離線瀏覽，顯示舊有行程數據</div>
-
-<div class="stay-info" id="stayDisplay">
-    <span class="stay-label">今日住宿</span>
-    <span id="stayName">載入中...</span>
-</div>
-
-<div class="nav-container">
-    <div class="nav" id="dayNav"></div>
-</div>
-
-<div class="timeline" id="itinerary">
+<div class="header-fixed">
+    <div id="offline-status">⚠️ 離線模式：顯示快取行程</div>
+    <div class="trip-main-info">
+        <h1 id="trip-title">我的旅遊行程</h1>
+    </div>
+    
+    <div class="top-info-bar">
+        <div class="info-row">
+            <span>📅</span>
+            <span id="display-date">讀取中...</span>
+        </div>
+        <div class="info-row">
+            <span>🏨</span>
+            <span id="display-stay">讀取中...</span>
+        </div>
     </div>
 
+    <div class="day-nav" id="dayNav"></div>
+</div>
+
+<div class="timeline" id="itineraryContent">
+    <p style="text-align:center; padding-top:50px; color:#999;">同步試算表中...</p>
+</div>
+
 <script>
-    const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQvJrfnAiYw3-NvbrcoKJeZZiwv981LT-dibEqvirgdfJZbXSEk5bS-KVsUaW2AuDS3K6F0uKK3Vg-E/pub?output=csv'; 
+    // 【修改重點】請將此網址替換成你 Google 試算表發布後的 CSV 連結
+    const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQvJrfnAiYw3-NvbrcoKJeZZiwv981LT-dibEqvirgdfJZbXSEk5bS-KVsUaW2AuDS3K6F0uKK3Vg-E/pub?output=csv';
+
     let travelData = [];
 
-    async function loadData() {
+    async function fetchData() {
         try {
-            const res = await fetch(SHEET_CSV_URL);
-            const text = await res.text();
-            localStorage.setItem('myTravelData', text);
-            processData(text);
-        } catch (err) {
-            const cached = localStorage.getItem('myTravelData');
-            if(cached) {
-                processData(cached);
-                document.getElementById('offlineNotice').style.display = 'block';
+            const response = await fetch(SHEET_CSV_URL);
+            const csvText = await response.text();
+            localStorage.setItem('cached_trip', csvText);
+            render(csvText);
+        } catch (e) {
+            const cache = localStorage.getItem('cached_trip');
+            if (cache) {
+                render(cache);
+                document.getElementById('offline-status').style.display = 'block';
             }
         }
     }
 
-    function processData(csv) {
-        const lines = csv.split('\n').filter(line => line.trim() !== "");
-        // 假設第一行是標題，從第二行開始解析
-        travelData = lines.slice(1).map(line => {
-            const cells = line.split(',');
+    function render(csvData) {
+        const rows = csvData.split('\n').filter(r => r.trim() !== "");
+        // 假設第一列是標題：Day, Date, Stay, Time, Location, Note, MapUrl
+        travelData = rows.slice(1).map(row => {
+            const cols = row.split(',');
             return {
-                day: cells[0]?.trim(),
-                date: cells[1]?.trim(),
-                stay: cells[2]?.trim(),
-                time: cells[3]?.trim(),
-                loc: cells[4]?.trim(),
-                note: cells[5]?.replace(/"/g, '').trim(), // 去除引號
-                map: cells[6]?.trim()
+                day: cols[0]?.trim(),
+                date: cols[1]?.trim(),
+                stay: cols[2]?.trim(),
+                time: cols[3]?.trim(),
+                loc: cols[4]?.trim(),
+                note: cols[5]?.replace(/"/g, '').trim(),
+                map: cols[6]?.trim()
             };
         });
-        
-        renderNav();
-        const firstDay = [...new Set(travelData.map(d => d.day))][0];
-        showDay(firstDay);
-    }
 
-    function renderNav() {
+        if (travelData.length > 0) {
+            // 顯示整段旅程的日期範圍
+            const firstDate = travelData[0].date;
+            const lastDate = travelData[travelData.length - 1].date;
+            document.getElementById('display-date').innerText = `${firstDate} ~ ${lastDate}`;
+            
+            // 顯示住宿 (預設顯示第一天的住宿)
+            document.getElementById('display-stay').innerText = travelData[0].stay;
+        }
+
+        // 生成天數切換鈕
+        const uniqueDays = [...new Set(travelData.map(t => t.day))];
         const nav = document.getElementById('dayNav');
-        const uniqueDays = [];
-        const dayMap = new Map();
-
-        travelData.forEach(item => {
-            if(!dayMap.has(item.day)) {
-                dayMap.set(item.day, item.date);
-                uniqueDays.push(item.day);
-            }
-        });
-
-        nav.innerHTML = uniqueDays.map((d, index) => `
-            <div class="nav-item ${index === 0 ? 'active' : ''}" onclick="selectDay(this, '${d}')">
-                Day ${d}
-                <span class="nav-date">${dayMap.get(d)}</span>
-            </div>
+        nav.innerHTML = uniqueDays.map((d, i) => `
+            <div class="day-tab ${i===0?'active':''}" onclick="changeDay('${d}', this)">Day ${d}</div>
         `).join('');
+
+        changeDay(uniqueDays[0]);
     }
 
-    function selectDay(element, day) {
-        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-        element.classList.add('active');
-        showDay(day);
-    }
+    function changeDay(day, el) {
+        if (el) {
+            document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+        }
 
-    function showDay(day) {
-        const container = document.getElementById('itinerary');
-        const dayItems = travelData.filter(item => item.day === day);
+        const filtered = travelData.filter(t => t.day === day);
+        const container = document.getElementById('itineraryContent');
         
-        // 更新住宿顯示
-        document.getElementById('stayName').innerText = dayItems[0]?.stay || '未設定';
-
-        // 更新行程列表
-        container.innerHTML = dayItems.map(item => `
-            <div class="event">
-                <div class="time-box">${item.time}</div>
-                <div class="card">
-                    <span class="loc-title">${item.loc}</span>
-                    ${item.note ? `<div class="note">${item.note}</div>` : ''}
-                    ${item.map ? `<a href="${item.map}" target="_blank" class="map-btn">📍 開啟地圖</a>` : ''}
+        container.innerHTML = filtered.map(item => `
+            <div class="event-card">
+                <div class="time-label">${item.time}</div>
+                <div class="content-body">
+                    <div class="loc-name">${item.loc}</div>
+                    ${item.note ? `<div class="note-box">${item.note}</div>` : ''}
+                    ${item.map ? `<a href="${item.map}" target="_blank" class="map-action">📍 開啟地圖</a>` : ''}
                 </div>
             </div>
         `).join('');
+
+        // 換天時自動更新該天的住宿 (如果每天住宿不同)
+        if(filtered.length > 0) {
+            document.getElementById('display-stay').innerText = filtered[0].stay;
+        }
     }
 
-    loadData();
+    fetchData();
 </script>
 
 </body>
