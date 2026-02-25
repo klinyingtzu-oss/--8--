@@ -2,125 +2,108 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>日本8日遊</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的旅遊手冊</title>
     <style>
-        :root { --main-blue: #2563eb; --bg-gray: #f8fafc; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .timeline-border { border-left: 2px dashed #cbd5e1; }
-        /* 讓頁面在斷網時也能顯示最後一次載入的內容 */
-        body { -webkit-tap-highlight-color: transparent; background-color: var(--bg-gray); }
+        :root { --main-color: #4a90e2; --bg-color: #f4f4f9; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg-color); margin: 0; padding-bottom: 50px; }
+        
+        /* 換色控制項 */
+        .theme-picker { padding: 10px; background: #fff; display: flex; gap: 10px; justify-content: center; }
+        .dot { width: 25px; height: 25px; border-radius: 50%; border: 2px solid #ddd; cursor: pointer; }
+
+        /* 天數導覽 */
+        .nav { position: sticky; top: 0; background: white; display: flex; overflow-x: auto; border-bottom: 1px solid #ddd; z-index: 100; }
+        .nav-item { padding: 15px 20px; white-space: nowrap; cursor: pointer; transition: 0.3s; }
+        .nav-item.active { color: var(--main-color); border-bottom: 3px solid var(--main-color); font-weight: bold; }
+
+        /* 行程卡片 (直列) */
+        .timeline { padding: 15px; }
+        .card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 5px solid var(--main-color); }
+        .time { color: var(--main-color); font-weight: bold; font-size: 0.9em; margin-bottom: 5px; }
+        .loc { font-size: 1.2em; font-weight: bold; margin-bottom: 8px; }
+        .note { font-size: 0.9em; color: #555; white-space: pre-wrap; line-height: 1.5; background: #f9f9f9; padding: 8px; border-radius: 5px; }
+        .btns { margin-top: 10px; display: flex; gap: 10px; }
+        .btn { padding: 8px 15px; border-radius: 20px; text-decoration: none; font-size: 0.8em; color: white; background: var(--main-color); }
+        
+        /* 離線提示 */
+        .offline-tip { background: #fff3cd; text-align: center; padding: 5px; font-size: 0.8em; display: none; }
     </style>
 </head>
 <body>
 
-    <header class="sticky top-0 z-50 bg-white shadow-sm border-b">
-        <div class="flex overflow-x-auto p-3 gap-2 no-scrollbar" id="day-nav">
-            </div>
-    </header>
+    <div class="offline-tip" id="offlineMsg">⚠️ 目前為離線模式，顯示最後一次更新的內容</div>
 
-    <main class="max-w-md mx-auto p-4" id="itinerary-content">
-        <div class="flex flex-col items-center justify-center py-20 text-gray-400">
-            <i class="fas fa-spinner fa-spin text-3xl mb-2"></i>
-            <p>正在從試算表同步行程...</p>
-        </div>
-    </main>
+    <div class="theme-picker">
+        <div class="dot" style="background:#4a90e2" onclick="changeColor('#4a90e2')"></div>
+        <div class="dot" style="background:#e67e22" onclick="changeColor('#e67e22')"></div>
+        <div class="dot" style="background:#27ae60" onclick="changeColor('#27ae60')"></div>
+        <div class="dot" style="background:#e91e63" onclick="changeColor('#e91e63')"></div>
+    </div>
+
+    <div class="nav" id="dayNav"></div>
+    <div class="timeline" id="content">讀取行程中...</div>
 
     <script>
-        // --- 1. 設定區：請在此放入你的 CSV 連結 ---
-        const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQvJrfnAiYw3-NvbrcoKJeZZiwv981LT-dibEqvirgdfJZbXSEk5bS-KVsUaW2AuDS3K6F0uKK3Vg-E/pub?output=csv';
-        
-        // --- 2. 初始化天數導覽 ---
-        const nav = document.getElementById('day-nav');
-        for (let i = 1; i <= 8; i++) {
-            nav.innerHTML += `
-                <a href="#day${i}" class="flex-none px-5 py-2 rounded-full bg-slate-100 text-slate-600 font-bold text-sm active:bg-blue-600 active:text-white transition">
-                    Day ${i}
-                </a>`;
-        }
+        // 【重要】請把下方網址替換成你從 Google 試算表複製的 CSV 網址
+        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQvJrfnAiYw3-NvbrcoKJeZZiwv981LT-dibEqvirgdfJZbXSEk5bS-KVsUaW2AuDS3K6F0uKK3Vg-E/pub?output=csv'; 
+        let allData = [];
 
-        // --- 3. 抓取資料與渲染 ---
-        async function loadData() {
+        async function fetchData() {
             try {
-                const response = await fetch(SHEET_CSV_URL);
-                const csvData = await response.text();
-                const rows = parseCSV(csvData);
-                renderItinerary(rows);
-                // 將資料存在本地，斷網也能看
-                localStorage.setItem('myTripData', JSON.stringify(rows));
-            } catch (error) {
-                console.error("網路不穩定，嘗試讀取快取資料...");
-                const cachedData = localStorage.getItem('myTripData');
-                if (cachedData) renderItinerary(JSON.parse(cachedData));
+                const response = await fetch(SHEET_URL);
+                const data = await response.text();
+                parseCSV(data);
+                localStorage.setItem('travel_cache', data); // 儲存供離線使用
+            } catch (e) {
+                const cache = localStorage.getItem('travel_cache');
+                if(cache) {
+                    parseCSV(cache);
+                    document.getElementById('offlineMsg').style.display = 'block';
+                }
             }
         }
 
-        function parseCSV(csv) {
-            const lines = csv.split('\n').filter(line => line.trim() !== '');
-            return lines.slice(1).map(line => {
-                // 處理 CSV 逗號問題
-                const values = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                return {
-                    day: values[0]?.replace(/"/g, ''),
-                    time: values[1]?.replace(/"/g, ''),
-                    title: values[2]?.replace(/"/g, ''),
-                    location: values[3]?.replace(/"/g, ''),
-                    note: values[4]?.replace(/"/g, ''),
-                    url: values[5]?.replace(/"/g, ''),
-                    mapUrl: values[6]?.replace(/"/g, '') || `https://www.google.com/maps/search/?api=1&query=${values[2]}`
-                };
+        function parseCSV(csvText) {
+            const rows = csvText.split('\n').slice(1);
+            allData = rows.map(row => {
+                const cols = row.split(',');
+                return { day: cols[0], time: cols[1], loc: cols[2], note: cols[3], url: cols[4], map: cols[5] };
             });
+            renderNav();
+            renderDay(allData[0].day);
         }
 
-        function renderItinerary(data) {
-            const container = document.getElementById('itinerary-content');
-            container.innerHTML = '';
+        function renderNav() {
+            const days = [...new Set(allData.map(d => d.day))];
+            const nav = document.getElementById('dayNav');
+            nav.innerHTML = days.map((d, i) => `<div class="nav-item ${i===0?'active':''}" onclick="renderDay('${d}', this)">Day ${d}</div>`).join('');
+        }
 
-            for (let d = 1; d <= 8; d++) {
-                const dayData = data.filter(item => item.day == d);
-                if (dayData.length === 0) continue;
-
-                let daySection = `
-                <section id="day${d}" class="mb-12 scroll-mt-20">
-                    <h2 class="text-2xl font-black text-slate-800 mb-6 flex items-center">
-                        <span class="bg-blue-600 text-white px-3 py-1 rounded-lg mr-2 text-base">D${d}</span>
-                        Day ${d} 行程
-                    </h2>
-                    <div class="ml-3 timeline-border pl-6 space-y-8">`;
-
-                dayData.forEach(item => {
-                    daySection += `
-                    <div class="relative">
-                        <div class="absolute -left-[33px] top-1.5 w-4 h-4 rounded-full bg-blue-600 border-4 border-white shadow-sm"></div>
-                        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
-                            <div class="flex justify-between items-start mb-1 text-blue-600 font-bold text-sm">
-                                <span><i class="far fa-clock mr-1"></i> ${item.time}</span>
-                            </div>
-                            <h3 class="text-lg font-bold text-slate-800">${item.title}</h3>
-                            <p class="text-sm text-slate-500 mt-1"><i class="fas fa-location-dot mr-1 text-red-400"></i> ${item.location}</p>
-                            ${item.note ? `<div class="mt-3 text-sm text-slate-600 bg-slate-50 p-3 rounded-xl border-l-4 border-slate-200">備註：${item.note}</div>` : ''}
-                            
-                            <div class="mt-4 flex gap-2">
-                                <a href="${item.mapUrl}" target="_blank" class="flex-1 bg-blue-600 text-white text-center py-2.5 rounded-xl text-xs font-bold active:scale-95 transition">
-                                    <i class="fas fa-map-marked-alt mr-1"></i> 地圖/導航
-                                </a>
-                                ${item.url ? `<a href="${item.url}" target="_blank" class="flex-1 bg-white border border-slate-200 text-slate-700 text-center py-2.5 rounded-xl text-xs font-bold active:bg-slate-50">
-                                    <i class="fas fa-external-link-alt mr-1"></i> 詳細資料
-                                </a>` : ''}
-                            </div>
-                        </div>
-                    </div>`;
-                });
-
-                daySection += `</div></section>`;
-                container.innerHTML += daySection;
+        function renderDay(day, el) {
+            if(el) {
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                el.classList.add('active');
             }
+            const filtered = allData.filter(d => d.day === day);
+            document.getElementById('content').innerHTML = filtered.map(item => `
+                <div class="card">
+                    <div class="time">${item.time}</div>
+                    <div class="loc">${item.loc}</div>
+                    ${item.note ? `<div class="note">${item.note}</div>` : ''}
+                    <div class="btns">
+                        ${item.url ? `<a class="btn" href="${item.url}" target="_blank">官網/預約</a>` : ''}
+                        ${item.map ? `<a class="btn" href="${item.map}" target="_blank">🗺️ 查看地圖</a>` : ''}
+                    </div>
+                </div>
+            `).join('');
         }
 
-        loadData();
+        function changeColor(color) {
+            document.documentElement.style.setProperty('--main-color', color);
+        }
+
+        fetchData();
     </script>
 </body>
 </html>
