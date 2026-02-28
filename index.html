@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>旅遊手冊 Pro</title>
+    <title>日本8日遊</title>
     <style>
         :root {
             --primary-blue: #1a4d8f;
@@ -15,9 +15,13 @@
 
         body { 
             font-family: -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif; 
-            margin: 0; background: #f4f7f9; color: #333; 
+            margin: 0; 
+            background: #f4f7f9; /* 預設背景，會被試算表覆蓋 */
+            color: #333; 
+            transition: background 0.3s ease;
         }
 
+        /* 置頂區域 */
         .header-fixed {
             position: sticky; top: 0; z-index: 1000;
             background: var(--primary-blue); color: white;
@@ -33,6 +37,7 @@
         .info-row { display: flex; margin-bottom: 5px; }
         .info-label { width: 85px; flex-shrink: 0; opacity: 0.8; }
 
+        /* 天數導覽 */
         .day-nav { display: flex; overflow-x: auto; background: var(--white); border-bottom: 1px solid #ddd; }
         .day-tab {
             flex: 1; min-width: 80px; padding: 15px 0; text-align: center;
@@ -40,6 +45,7 @@
         }
         .day-tab.active { color: var(--primary-blue); border-bottom: 3px solid var(--primary-blue); background: #f9fbff; }
 
+        /* 行程內容區 */
         .timeline { padding: 20px 15px; max-width: 500px; margin: 0 auto; }
         
         .event-card {
@@ -47,11 +53,13 @@
             box-shadow: 0 3px 10px rgba(0,0,0,0.08); border: 1px solid #eee; overflow: hidden;
         }
 
+        /* 時間欄位微調 */
         .time-label {
-            width: 95px;
+            width: 85px;
             background: var(--light-blue); color: var(--primary-blue);
             display: flex; align-items: center; justify-content: center;
-            font-weight: 900; font-size: 1.15rem;
+            font-weight: 800; 
+            font-size: 1.05rem; /* 字體大小微調 */
             flex-shrink: 0; border-right: 1px solid #dce6f2;
         }
 
@@ -69,7 +77,7 @@
             padding: 8px 12px; border-radius: 6px; border-left: 4px solid #ccd1d9;
         }
 
-        /* 按鈕區 */
+        /* 按鈕群組 */
         .btn-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
         .btn {
             text-decoration: none; font-size: 0.85rem; font-weight: bold;
@@ -78,8 +86,9 @@
         .map-btn { color: var(--primary-blue); border: 1px solid var(--primary-blue); }
         .link-btn { color: var(--link-green); border: 1px solid var(--link-green); }
 
+        /* 交通路徑 */
         .transport-section {
-            margin: 0 0 0 47px;
+            margin: 0 0 0 42px;
             padding: 10px 0 10px 40px;
             border-left: 3px solid var(--arrow-gray);
             position: relative;
@@ -94,7 +103,6 @@
             background: #eee; padding: 6px 14px; border-radius: 12px;
             display: block; width: fit-content;
         }
-        .trans-step b { color: #000; margin-left: 5px; }
 
         #offline-status { background: #fff3cd; color: #856404; text-align: center; font-size: 0.75rem; padding: 4px; display: none; }
     </style>
@@ -103,7 +111,7 @@
 
 <div class="header-fixed">
     <div id="offline-status">離線模式：顯示快取資料</div>
-    <div class="trip-main-info"><h1>日本8日遊行程</h1></div>
+    <div class="trip-main-info"><h1>日本8日遊</h1></div>
     <div class="top-info-bar">
         <div class="info-row"><span class="info-label">日期：</span><span id="display-date">-</span></div>
         <div class="info-row"><span class="info-label">住宿地點：</span><span id="display-stay">-</span></div>
@@ -121,10 +129,10 @@
         try {
             const response = await fetch(SHEET_CSV_URL);
             const csvText = await response.text();
-            localStorage.setItem('trip_v6_cache', csvText);
+            localStorage.setItem('trip_v7_cache', csvText);
             render(csvText);
         } catch (e) {
-            const cache = localStorage.getItem('trip_v6_cache');
+            const cache = localStorage.getItem('trip_v7_cache');
             if (cache) { render(cache); document.getElementById('offline-status').style.display = 'block'; }
         }
     }
@@ -144,12 +152,17 @@
                 trans: c[7]?.replace(/"/g, '').trim(),
                 duration: c[8]?.replace(/"/g, '').trim(),
                 userColor: c[9]?.replace(/"/g, '').trim(),
-                links: c[10]?.replace(/"/g, '').trim() // 讀取 K 欄連結
+                links: c[10]?.replace(/"/g, '').trim(),
+                bgColor: c[11]?.replace(/"/g, '').trim() // 讀取 L 欄背景色
             };
         });
 
         if (travelData.length > 0) {
             document.getElementById('display-date').innerText = `${travelData[0].date}  ${travelData[travelData.length - 1].date}`;
+            // 設定全域背景色 (取第一筆資料)
+            if (travelData[0].bgColor) {
+                document.body.style.backgroundColor = travelData[0].bgColor;
+            }
         }
 
         const uniqueDays = [...new Set(travelData.map(t => t.day))];
@@ -164,7 +177,11 @@
             el.classList.add('active');
         }
         const filtered = travelData.filter(t => t.day === day);
-        if(filtered.length > 0) document.getElementById('display-stay').innerText = filtered[0].stay;
+        if(filtered.length > 0) {
+            document.getElementById('display-stay').innerText = filtered[0].stay;
+            // 換天時也可以切換背景色 (如果有填的話)
+            if (filtered[0].bgColor) document.body.style.backgroundColor = filtered[0].bgColor;
+        }
 
         let html = '';
         filtered.forEach((item) => {
@@ -184,7 +201,6 @@
                 transHtml += `</div>`;
             }
 
-            // 處理額外連結
             const extraLinks = (item.links || "").split(/;|；/).map(l => l.trim()).filter(l => l !== "");
             const linksHtml = extraLinks.map((url, i) => `<a href="${url}" target="_blank" class="btn link-btn">🔗 連結 ${extraLinks.length > 1 ? i+1 : ''}</a>`).join('');
 
