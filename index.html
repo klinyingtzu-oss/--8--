@@ -3,111 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>日本8日遊 Pro</title>
+    <title>日本8日遊</title>
     <style>
         :root {
             --primary-blue: #1a4d8f;
-            --light-blue: #e8f0fe;
             --white: #ffffff;
-            --arrow-gray: #bdc3c7;
-            --link-green: #27ae60;
+            --text-main: #111;
+            --arrow-gray: #ddd;
         }
 
         body { 
             font-family: -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif; 
-            margin: 0; background: #f4f7f9; color: #333; 
+            margin: 0; background: #f4f7f9; color: var(--text-main); 
+            transition: background 0.3s ease;
         }
 
-        .header-fixed {
-            position: sticky; top: 0; z-index: 1000;
+        /* 頂部標題與資訊列：改為隨頁面捲動消失 */
+        .header-static {
             background: var(--primary-blue); color: white;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            padding-bottom: 5px;
         }
-        .trip-main-info { padding: 15px 20px 5px 20px; text-align: center; }
-        .trip-main-info h1 { margin: 0; font-size: 1.3rem; }
+        .trip-main-info { padding: 20px 20px 5px 20px; text-align: center; }
+        .trip-main-info h1 { margin: 0; font-size: 1.2rem; }
         
         .top-info-bar {
             background: rgba(255, 255, 255, 0.1);
-            margin: 10px 15px 15px 15px; padding: 12px; border-radius: 8px; font-size: 0.9rem;
+            margin: 10px 15px 10px 15px; padding: 12px; border-radius: 8px; font-size: 0.85rem;
         }
-        .info-row { display: flex; margin-bottom: 5px; }
-        .info-label { width: 85px; flex-shrink: 0; opacity: 0.8; }
+        .info-row { display: flex; margin-bottom: 3px; }
+        .info-label { width: 80px; flex-shrink: 0; opacity: 0.8; }
 
-        .day-nav { display: flex; overflow-x: auto; background: var(--white); border-bottom: 1px solid #ddd; }
+        /* 天數導覽：維持固定在頂部 */
+        .day-nav-container {
+            position: sticky; top: 0; z-index: 1000;
+            background: var(--white);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .day-nav { display: flex; overflow-x: auto; }
         .day-tab {
-            flex: 1; min-width: 80px; padding: 15px 0; text-align: center;
-            color: #666; cursor: pointer; font-weight: bold; border-bottom: 3px solid transparent;
+            flex: 1; min-width: 75px; padding: 14px 0; text-align: center;
+            color: #888; cursor: pointer; font-weight: bold; font-size: 0.9rem;
+            border-bottom: 3px solid transparent;
         }
-        .day-tab.active { color: var(--primary-blue); border-bottom: 3px solid var(--primary-blue); background: #f9fbff; }
+        .day-tab.active { color: var(--primary-blue); border-bottom: 3px solid var(--primary-blue); }
 
+        /* 行程內容 */
         .timeline { padding: 20px 15px; max-width: 500px; margin: 0 auto; }
         
         .event-card {
-            display: flex; background: var(--white); border-radius: 12px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.08); border: 1px solid #eee; overflow: hidden;
+            display: flex; background: var(--white); border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); border: 1px solid #f0f0f0;
+            padding: 15px 15px 15px 20px; position: relative; overflow: hidden;
         }
+        .color-accent-bar { position: absolute; left: 0; top: 0; bottom: 0; width: 8px; }
+        .content-body { flex-grow: 1; }
 
-        .time-label {
-            width: 95px;
-            background: var(--light-blue); color: var(--primary-blue);
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 900; font-size: 1.15rem;
-            flex-shrink: 0; border-right: 1px solid #dce6f2;
-        }
+        .header-line { display: flex; align-items: baseline; gap: 12px; margin-bottom: 8px; flex-wrap: wrap; }
+        .time-text { font-weight: 800; letter-spacing: 0.5px; white-space: nowrap; }
+        .loc-title { font-size: 1.25rem; font-weight: 900; color: #000; }
 
-        .content-body { padding: 15px; flex-grow: 1; }
-
-        .loc-tag {
-            display: inline-block; color: white;
-            padding: 5px 15px; border-radius: 6px;
-            font-size: 1.1rem; font-weight: bold; margin-bottom: 10px;
-        }
-
-        .note-container { display: flex; flex-direction: column; gap: 6px; margin: 10px 0; }
+        .note-container { display: flex; flex-direction: column; gap: 6px; margin: 8px 0; }
         .note-item { 
-            font-size: 0.95rem; color: #444; background: #f8f9fa; 
-            padding: 8px 12px; border-radius: 6px; border-left: 4px solid #ccd1d9;
+            font-size: 0.95rem; color: #444; background: #f9f9f9; 
+            padding: 8px 12px; border-radius: 4px; border: 1px solid #f0f0f0;
         }
 
-        /* 按鈕區 */
-        .btn-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .btn-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; }
         .btn {
             text-decoration: none; font-size: 0.85rem; font-weight: bold;
-            padding: 6px 14px; border-radius: 20px; display: inline-flex; align-items: center;
+            padding: 6px 14px; border-radius: 4px; border: 1px solid #ddd; color: #555; background: #fff;
         }
-        .map-btn { color: var(--primary-blue); border: 1px solid var(--primary-blue); }
-        .link-btn { color: var(--link-green); border: 1px solid var(--link-green); }
 
         .transport-section {
-            margin: 0 0 0 47px;
-            padding: 10px 0 10px 40px;
-            border-left: 3px solid var(--arrow-gray);
-            position: relative;
+            margin: 0 0 0 35px; padding: 12px 0 12px 30px;
+            border-left: 2px dashed var(--arrow-gray); position: relative;
         }
         .transport-section::after {
-            content: "▼";
-            position: absolute; bottom: -8px; left: -8px;
-            color: var(--arrow-gray); font-size: 12px;
+            content: "▼"; position: absolute; bottom: -6px; left: -6.5px; color: var(--arrow-gray); font-size: 10px;
         }
         .trans-step {
-            font-size: 0.9rem; color: #555; margin-bottom: 8px;
-            background: #eee; padding: 6px 14px; border-radius: 12px;
-            display: block; width: fit-content;
+            font-size: 0.85rem; color: #666; background: #eee; padding: 5px 12px; border-radius: 4px; display: inline-block; margin-bottom: 6px;
         }
-        .trans-step b { color: #000; margin-left: 5px; }
 
-        #offline-status { background: #fff3cd; color: #856404; text-align: center; font-size: 0.75rem; padding: 4px; display: none; }
+        #offline-status { background: #fff3cd; color: #856404; text-align: center; font-size: 0.7rem; padding: 4px; display: none; }
     </style>
 </head>
 <body>
 
-<div class="header-fixed">
-    <div id="offline-status">離線模式：顯示快取資料</div>
-    <div class="trip-main-info"><h1>日本8日遊</h1></div>
+<div class="header-static">
+    <div id="offline-status">離線模式</div>
+    <div class="trip-main-info"><h1>日本8日遊行程</h1></div>
     <div class="top-info-bar">
         <div class="info-row"><span class="info-label">日期：</span><span id="display-date">-</span></div>
         <div class="info-row"><span class="info-label">住宿地點：</span><span id="display-stay">-</span></div>
     </div>
+</div>
+
+<div class="day-nav-container">
     <div class="day-nav" id="dayNav"></div>
 </div>
 
@@ -121,10 +113,10 @@
         try {
             const response = await fetch(SHEET_CSV_URL);
             const csvText = await response.text();
-            localStorage.setItem('trip_v6_cache', csvText);
+            localStorage.setItem('trip_v12_cache', csvText);
             render(csvText);
         } catch (e) {
-            const cache = localStorage.getItem('trip_v6_cache');
+            const cache = localStorage.getItem('trip_v12_cache');
             if (cache) { render(cache); document.getElementById('offline-status').style.display = 'block'; }
         }
     }
@@ -144,12 +136,15 @@
                 trans: c[7]?.replace(/"/g, '').trim(),
                 duration: c[8]?.replace(/"/g, '').trim(),
                 userColor: c[9]?.replace(/"/g, '').trim(),
-                links: c[10]?.replace(/"/g, '').trim() // 讀取 K 欄連結
+                links: c[10]?.replace(/"/g, '').trim(),
+                bgColor: c[11]?.replace(/"/g, '').trim(),
+                timeSize: c[12]?.replace(/"/g, '').trim()
             };
         });
 
         if (travelData.length > 0) {
-            document.getElementById('display-date').innerText = `${travelData[0].date}  ${travelData[travelData.length - 1].date}`;
+            document.getElementById('display-date').innerText = `${travelData[0].date} — ${travelData[travelData.length - 1].date}`;
+            if (travelData[0].bgColor) document.body.style.backgroundColor = travelData[0].bgColor;
         }
 
         const uniqueDays = [...new Set(travelData.map(t => t.day))];
@@ -164,13 +159,15 @@
             el.classList.add('active');
         }
         const filtered = travelData.filter(t => t.day === day);
-        if(filtered.length > 0) document.getElementById('display-stay').innerText = filtered[0].stay;
+        if(filtered.length > 0) {
+            document.getElementById('display-stay').innerText = filtered[0].stay;
+            if (filtered[0].bgColor) document.body.style.backgroundColor = filtered[0].bgColor;
+        }
 
         let html = '';
         filtered.forEach((item) => {
             const notes = (item.note || "").split(/;|；/).map(n => n.trim()).filter(n => n !== "");
             const notesHtml = notes.map(n => `<div class="note-item">${n}</div>`).join('');
-
             const transSteps = (item.trans || "").split(/;|；/).map(t => t.trim()).filter(t => t !== "");
             const durSteps = (item.duration || "").split(/;|；/).map(d => d.trim());
             
@@ -184,20 +181,23 @@
                 transHtml += `</div>`;
             }
 
-            // 處理額外連結
             const extraLinks = (item.links || "").split(/;|；/).map(l => l.trim()).filter(l => l !== "");
-            const linksHtml = extraLinks.map((url, i) => `<a href="${url}" target="_blank" class="btn link-btn">🔗 連結 ${extraLinks.length > 1 ? i+1 : ''}</a>`).join('');
+            const linksHtml = extraLinks.map((url, i) => `<a href="${url}" target="_blank" class="btn">🔗 連結 ${extraLinks.length > 1 ? i+1 : ''}</a>`).join('');
 
-            const customBg = item.userColor || '#1a4d8f';
+            const activeColor = item.userColor || '#ccc';
+            const tSize = item.timeSize ? item.timeSize + 'px' : '18px';
 
             html += `
                 <div class="event-card">
-                    <div class="time-label">${item.time}</div>
+                    <div class="color-accent-bar" style="background:${activeColor}"></div>
                     <div class="content-body">
-                        <div class="loc-tag" style="background:${customBg}">${item.loc}</div>
+                        <div class="header-line">
+                            <span class="time-text" style="color:${activeColor}; font-size:${tSize}">${item.time}</span>
+                            <span class="loc-title">${item.loc}</span>
+                        </div>
                         ${notesHtml ? `<div class="note-container">${notesHtml}</div>` : ''}
                         <div class="btn-group">
-                            ${item.map ? `<a href="${item.map}" target="_blank" class="btn map-btn">📍 查看地圖</a>` : ''}
+                            ${item.map ? `<a href="${item.map}" target="_blank" class="btn">📍 地圖</a>` : ''}
                             ${linksHtml}
                         </div>
                     </div>
@@ -207,7 +207,9 @@
         });
 
         document.getElementById('itineraryContent').innerHTML = html;
-        window.scrollTo({top: 0, behavior: 'smooth'});
+        // 換天時自動滑動到「天數導覽列」的下方，避免視線被頂部資訊干擾
+        const scrollOffset = document.querySelector('.header-static').offsetHeight;
+        window.scrollTo({top: scrollOffset, behavior: 'smooth'});
     }
 
     fetchData();
