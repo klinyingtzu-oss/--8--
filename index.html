@@ -3,163 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>日本8日遊行程</title>
+    <title>日本8日遊 Pro</title>
     <style>
         :root {
             --primary-blue: #1a4d8f;
+            --light-blue: #e8f0fe;
             --white: #ffffff;
-            --text-main: #111;
-            --arrow-gray: #ddd;
+            --arrow-gray: #bdc3c7;
+            --link-green: #27ae60;
         }
 
         body { 
             font-family: -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif; 
-            margin: 0; background: #f4f7f9; color: var(--text-main); 
-            transition: background 0.3s ease;
+            margin: 0; background: #f4f7f9; color: #333; 
         }
 
-        /* 隨滑動消失的區塊 */
-        .header-static {
+        .header-fixed {
+            position: sticky; top: 0; z-index: 1000;
             background: var(--primary-blue); color: white;
-            padding-bottom: 5px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
-        .trip-main-info { padding: 25px 20px 5px 20px; text-align: center; }
-        .trip-main-info h1 { margin: 0; font-size: 1.4rem; letter-spacing: 1px; }
+        .trip-main-info { padding: 15px 20px 5px 20px; text-align: center; }
+        .trip-main-info h1 { margin: 0; font-size: 1.3rem; }
         
         .top-info-bar {
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.1);
             margin: 10px 15px 15px 15px; padding: 12px; border-radius: 8px; font-size: 0.9rem;
         }
-        .info-row { display: flex; margin-bottom: 4px; }
-        .info-label { width: 85px; flex-shrink: 0; opacity: 0.8; font-weight: bold; }
+        .info-row { display: flex; margin-bottom: 5px; }
+        .info-label { width: 85px; flex-shrink: 0; opacity: 0.8; }
 
-        /* 固定在頂部的導覽列 */
-        .nav-sticky {
-            position: sticky; top: 0; z-index: 1000;
-            background: var(--white);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .day-nav { display: flex; overflow-x: auto; scrollbar-width: none; }
-        .day-nav::-webkit-scrollbar { display: none; }
+        .day-nav { display: flex; overflow-x: auto; background: var(--white); border-bottom: 1px solid #ddd; }
         .day-tab {
             flex: 1; min-width: 80px; padding: 15px 0; text-align: center;
-            color: #888; cursor: pointer; font-weight: bold; font-size: 0.95rem;
-            border-bottom: 3px solid transparent; transition: all 0.2s;
+            color: #666; cursor: pointer; font-weight: bold; border-bottom: 3px solid transparent;
         }
-        .day-tab.active { color: var(--primary-blue); border-bottom: 3px solid var(--primary-blue); background: #f8fbff; }
+        .day-tab.active { color: var(--primary-blue); border-bottom: 3px solid var(--primary-blue); background: #f9fbff; }
 
-        .timeline { padding: 20px 15px; max-width: 550px; margin: 0 auto; min-height: 100vh; }
+        .timeline { padding: 20px 15px; max-width: 500px; margin: 0 auto; }
         
-        /* 景點卡片：並排且含重直線 */
         .event-card {
-            display: flex; background: var(--white); border-radius: 10px;
-            box-shadow: 0 3px 12px rgba(0,0,0,0.06); border: 1px solid #eee;
-            padding: 18px 18px 18px 25px; 
-            position: relative; overflow: hidden;
+            display: flex; background: var(--white); border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08); border: 1px solid #eee; overflow: hidden;
         }
 
-        /* 左側垂直重直線條 */
-        .color-accent-line {
-            position: absolute; left: 0; top: 0; bottom: 0; width: 8px;
+        .time-label {
+            width: 95px;
+            background: var(--light-blue); color: var(--primary-blue);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 900; font-size: 1.15rem;
+            flex-shrink: 0; border-right: 1px solid #dce6f2;
         }
 
-        .content-body { flex-grow: 1; }
+        .content-body { padding: 15px; flex-grow: 1; }
 
-        /* 時間與位置並排 */
-        .header-line {
-            display: flex; align-items: baseline; gap: 15px; margin-bottom: 10px; flex-wrap: wrap;
+        .loc-tag {
+            display: inline-block; color: white;
+            padding: 5px 15px; border-radius: 6px;
+            font-size: 1.1rem; font-weight: bold; margin-bottom: 10px;
         }
 
-        .time-text {
-            font-weight: 900; 
-            letter-spacing: 0.5px;
-            white-space: nowrap;
-        }
-
-        .loc-title {
-            font-size: 1.3rem; font-weight: 900; color: #000;
-        }
-
-        .note-container { display: flex; flex-direction: column; gap: 8px; margin: 10px 0; }
+        .note-container { display: flex; flex-direction: column; gap: 6px; margin: 10px 0; }
         .note-item { 
-            font-size: 1rem; color: #444; background: #f8f9fa; 
-            padding: 10px 12px; border-radius: 6px; border: 1px solid #eaedf0;
+            font-size: 0.95rem; color: #444; background: #f8f9fa; 
+            padding: 8px 12px; border-radius: 6px; border-left: 4px solid #ccd1d9;
         }
 
-        .btn-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; }
+        /* 按鈕區 */
+        .btn-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
         .btn {
             text-decoration: none; font-size: 0.85rem; font-weight: bold;
-            padding: 7px 16px; border-radius: 25px; border: 1.5px solid #ddd; color: #555;
-            background: #fff; display: inline-flex; align-items: center;
+            padding: 6px 14px; border-radius: 20px; display: inline-flex; align-items: center;
         }
-        .btn-map { color: var(--primary-blue); border-color: var(--primary-blue); }
+        .map-btn { color: var(--primary-blue); border: 1px solid var(--primary-blue); }
+        .link-btn { color: var(--link-green); border: 1px solid var(--link-green); }
 
-        /* 交通連線 */
         .transport-section {
-            margin: 0 0 0 40px; padding: 15px 0 15px 35px;
-            border-left: 2.5px dashed var(--arrow-gray); position: relative;
+            margin: 0 0 0 47px;
+            padding: 10px 0 10px 40px;
+            border-left: 3px solid var(--arrow-gray);
+            position: relative;
         }
         .transport-section::after {
-            content: "▼"; position: absolute; bottom: -8px; left: -7.5px;
+            content: "▼";
+            position: absolute; bottom: -8px; left: -8px;
             color: var(--arrow-gray); font-size: 12px;
         }
         .trans-step {
-            font-size: 0.9rem; color: #666; background: #eee;
-            padding: 6px 14px; border-radius: 15px; display: inline-block; margin-bottom: 8px;
+            font-size: 0.9rem; color: #555; margin-bottom: 8px;
+            background: #eee; padding: 6px 14px; border-radius: 12px;
+            display: block; width: fit-content;
         }
+        .trans-step b { color: #000; margin-left: 5px; }
 
-        #offline-status { background: #fff3cd; color: #856404; text-align: center; font-size: 0.75rem; padding: 5px; display: none; }
+        #offline-status { background: #fff3cd; color: #856404; text-align: center; font-size: 0.75rem; padding: 4px; display: none; }
     </style>
 </head>
 <body>
 
-<div class="header-static" id="topSection">
-    <div id="offline-status">正在讀取最新行程...</div>
+<div class="header-fixed">
+    <div id="offline-status">離線模式：顯示快取資料</div>
     <div class="trip-main-info"><h1>日本8日遊行程</h1></div>
     <div class="top-info-bar">
         <div class="info-row"><span class="info-label">日期：</span><span id="display-date">-</span></div>
         <div class="info-row"><span class="info-label">住宿地點：</span><span id="display-stay">-</span></div>
     </div>
-</div>
-
-<div class="nav-sticky">
     <div class="day-nav" id="dayNav"></div>
 </div>
 
-<div class="timeline" id="itineraryContent">
-    <div style="text-align:center; padding:50px; color:#aaa;">請先在代碼中填入你的 CSV 網址...</div>
-</div>
+<div class="timeline" id="itineraryContent"></div>
 
 <script>
-    // 【重要】請在此填入你的 Google 試算表 CSV 發佈網址
-    const SHEET_CSV_URL = '你的_CSV_網址_在此'; 
-
+    const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQvJrfnAiYw3-NvbrcoKJeZZiwv981LT-dibEqvirgdfJZbXSEk5bS-KVsUaW2AuDS3K6F0uKK3Vg-E/pub?output=csv'; 
     let travelData = [];
-
-    // 測試資料（當網址還沒填寫或抓不到時會顯示）
-    const dummyData = `"Day","Date","Stay","Time","Loc","Note","Map","Trans","Duration","Color","Links","BgColor","TimeSize"
-"1","2026/02/28","台中林酒店","10:00","台中火車站","記得帶雨傘;跟朋友約在二樓","https://maps.app.goo.gl/","計程車","15分","#ff6600","","#f4f7f9","28"
-"1","2026/02/28","台中林酒店","12:00","勤美綠園道","吃午餐;逛誠品","https://maps.app.goo.gl/","步行","10分","#1a4d8f","","#f4f7f9","20"`;
 
     async function fetchData() {
         try {
-            if (SHEET_CSV_URL === 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQvJrfnAiYw3-NvbrcoKJeZZiwv981LT-dibEqvirgdfJZbXSEk5bS-KVsUaW2AuDS3K6F0uKK3Vg-E/pub?output=csv') {
-                render(dummyData);
-                return;
-            }
             const response = await fetch(SHEET_CSV_URL);
             const csvText = await response.text();
-            localStorage.setItem('trip_cache', csvText);
+            localStorage.setItem('trip_v6_cache', csvText);
             render(csvText);
         } catch (e) {
-            const cache = localStorage.getItem('trip_cache');
-            if (cache) { 
-                render(cache); 
-                document.getElementById('offline-status').innerText = '離線模式：顯示快取資料';
-                document.getElementById('offline-status').style.display = 'block'; 
-            } else {
-                render(dummyData); // 連快取都沒有就顯示測試資料
-            }
+            const cache = localStorage.getItem('trip_v6_cache');
+            if (cache) { render(cache); document.getElementById('offline-status').style.display = 'block'; }
         }
     }
 
@@ -178,16 +144,12 @@
                 trans: c[7]?.replace(/"/g, '').trim(),
                 duration: c[8]?.replace(/"/g, '').trim(),
                 userColor: c[9]?.replace(/"/g, '').trim(),
-                links: c[10]?.replace(/"/g, '').trim(),
-                bgColor: c[11]?.replace(/"/g, '').trim(),
-                timeSize: c[12]?.replace(/"/g, '').trim()
+                links: c[10]?.replace(/"/g, '').trim() // 讀取 K 欄連結
             };
         });
 
         if (travelData.length > 0) {
-            document.getElementById('display-date').innerText = `${travelData[0].date} — ${travelData[travelData.length - 1].date}`;
-            if (travelData[0].bgColor) document.body.style.backgroundColor = travelData[0].bgColor;
-            document.getElementById('offline-status').style.display = 'none';
+            document.getElementById('display-date').innerText = `${travelData[0].date}  ${travelData[travelData.length - 1].date}`;
         }
 
         const uniqueDays = [...new Set(travelData.map(t => t.day))];
@@ -202,14 +164,13 @@
             el.classList.add('active');
         }
         const filtered = travelData.filter(t => t.day === day);
-        if(filtered.length > 0) {
-            document.getElementById('display-stay').innerText = filtered[0].stay;
-        }
+        if(filtered.length > 0) document.getElementById('display-stay').innerText = filtered[0].stay;
 
         let html = '';
         filtered.forEach((item) => {
             const notes = (item.note || "").split(/;|；/).map(n => n.trim()).filter(n => n !== "");
             const notesHtml = notes.map(n => `<div class="note-item">${n}</div>`).join('');
+
             const transSteps = (item.trans || "").split(/;|；/).map(t => t.trim()).filter(t => t !== "");
             const durSteps = (item.duration || "").split(/;|；/).map(d => d.trim());
             
@@ -223,23 +184,20 @@
                 transHtml += `</div>`;
             }
 
+            // 處理額外連結
             const extraLinks = (item.links || "").split(/;|；/).map(l => l.trim()).filter(l => l !== "");
-            const linksHtml = extraLinks.map((url, i) => `<a href="${url}" target="_blank" class="btn">🔗 連結 ${extraLinks.length > 1 ? i+1 : ''}</a>`).join('');
+            const linksHtml = extraLinks.map((url, i) => `<a href="${url}" target="_blank" class="btn link-btn">🔗 連結 ${extraLinks.length > 1 ? i+1 : ''}</a>`).join('');
 
-            const activeColor = item.userColor || '#ccc';
-            const currentFontSize = item.timeSize ? item.timeSize + 'px' : '18px';
+            const customBg = item.userColor || '#1a4d8f';
 
             html += `
                 <div class="event-card">
-                    <div class="color-accent-line" style="background:${activeColor}"></div>
+                    <div class="time-label">${item.time}</div>
                     <div class="content-body">
-                        <div class="header-line">
-                            <span class="time-text" style="color:${activeColor}; font-size:${currentFontSize}">${item.time}</span>
-                            <span class="loc-title">${item.loc}</span>
-                        </div>
+                        <div class="loc-tag" style="background:${customBg}">${item.loc}</div>
                         ${notesHtml ? `<div class="note-container">${notesHtml}</div>` : ''}
                         <div class="btn-group">
-                            ${item.map ? `<a href="${item.map}" target="_blank" class="btn btn-map">📍 地圖</a>` : ''}
+                            ${item.map ? `<a href="${item.map}" target="_blank" class="btn map-btn">📍 查看地圖</a>` : ''}
                             ${linksHtml}
                         </div>
                     </div>
