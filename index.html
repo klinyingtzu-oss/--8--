@@ -2,164 +2,126 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>日本8日遊</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日本8日遊行程</title>
     <style>
-        :root { --main-blue: #2563eb; --bg-gray: #f8fafc; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .timeline-border { border-left: 2px dashed #cbd5e1; }
-        body { -webkit-tap-highlight-color: transparent; background-color: var(--bg-gray); scroll-behavior: smooth; }
-        .day-card { scroll-margin-top: 80px; }
+        :root {
+            --primary-blue: #1a4d8f;
+            --white: #ffffff;
+            --text-main: #111;
+            --arrow-gray: #ddd;
+        }
+
+        body { 
+            font-family: -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif; 
+            margin: 0; background: #f4f7f9; color: var(--text-main); 
+            transition: background 0.3s ease;
+        }
+
+        /* 隨滑動消失的資訊區 */
+        .header-static {
+            background: var(--primary-blue); color: white;
+            padding-bottom: 5px;
+        }
+        .trip-main-info { padding: 25px 20px 5px 20px; text-align: center; }
+        .trip-main-info h1 { margin: 0; font-size: 1.4rem; letter-spacing: 1px; }
+        
+        .top-info-bar {
+            background: rgba(255, 255, 255, 0.15);
+            margin: 10px 15px 15px 15px; padding: 12px; border-radius: 8px; font-size: 0.9rem;
+        }
+        .info-row { display: flex; margin-bottom: 4px; }
+        .info-label { width: 85px; flex-shrink: 0; opacity: 0.8; font-weight: bold; }
+
+        /* 固定在頂部的天數導覽列 */
+        .nav-sticky {
+            position: sticky; top: 0; z-index: 1000;
+            background: var(--white);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .day-nav { display: flex; overflow-x: auto; scrollbar-width: none; }
+        .day-nav::-webkit-scrollbar { display: none; }
+        .day-tab {
+            flex: 1; min-width: 80px; padding: 15px 0; text-align: center;
+            color: #888; cursor: pointer; font-weight: bold; font-size: 0.95rem;
+            border-bottom: 3px solid transparent; transition: all 0.2s;
+        }
+        .day-tab.active { color: var(--primary-blue); border-bottom: 3px solid var(--primary-blue); background: #f8fbff; }
+
+        .timeline { padding: 20px 15px; max-width: 550px; margin: 0 auto; }
+        
+        /* 景點卡片：並排且含重直線 */
+        .event-card {
+            display: flex; background: var(--white); border-radius: 10px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.06); border: 1px solid #eee;
+            padding: 18px 18px 18px 25px; 
+            position: relative; overflow: hidden;
+        }
+
+        /* 左側重直線顏色 */
+        .color-accent-line {
+            position: absolute; left: 0; top: 0; bottom: 0; width: 8px;
+        }
+
+        .content-body { flex-grow: 1; }
+
+        /* 時間與位置並排排版 */
+        .header-line {
+            display: flex; align-items: baseline; gap: 15px; margin-bottom: 10px; flex-wrap: wrap;
+        }
+
+        .time-text {
+            font-weight: 900; 
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            /* 字體大小由 JS 動態從 M 欄讀取 */
+        }
+
+        .loc-title {
+            font-size: 1.3rem; font-weight: 900; color: #000;
+        }
+
+        .note-container { display: flex; flex-direction: column; gap: 8px; margin: 10px 0; }
+        .note-item { 
+            font-size: 1rem; color: #444; background: #f8f9fa; 
+            padding: 10px 12px; border-radius: 6px; border: 1px solid #eaedf0;
+        }
+
+        /* 按鈕樣式 */
+        .btn-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; }
+        .btn {
+            text-decoration: none; font-size: 0.85rem; font-weight: bold;
+            padding: 7px 16px; border-radius: 25px; border: 1.5px solid #ddd; color: #555;
+            background: #fff; display: inline-flex; align-items: center; transition: 0.2s;
+        }
+        .btn:active { transform: scale(0.95); background: #f0f0f0; }
+        .btn-map { color: var(--primary-blue); border-color: var(--primary-blue); }
+
+        /* 交通連線（虛線） */
+        .transport-section {
+            margin: 0 0 0 40px; padding: 15px 0 15px 35px;
+            border-left: 2.5px dashed var(--arrow-gray); position: relative;
+        }
+        .transport-section::after {
+            content: "▼"; position: absolute; bottom: -8px; left: -7.5px;
+            color: var(--arrow-gray); font-size: 12px;
+        }
+        .trans-step {
+            font-size: 0.9rem; color: #666; background: #eee;
+            padding: 6px 14px; border-radius: 15px; display: inline-block; margin-bottom: 8px;
+        }
+        .trans-step b { color: #000; margin-left: 5px; }
+
+        #offline-status { background: #fff3cd; color: #856404; text-align: center; font-size: 0.75rem; padding: 5px; display: none; }
     </style>
 </head>
 <body>
 
-    <header class="sticky top-0 z-50 bg-white shadow-sm border-b">
-        <div class="p-3 pb-1 text-center font-bold text-blue-600 text-lg">🇯🇵 日本8日遊</div>
-        <div class="flex overflow-x-auto p-3 gap-2 no-scrollbar" id="day-nav">
-            </div>
-    </header>
-
-    <main class="max-w-md mx-auto p-4 min-h-screen" id="itinerary-content">
-        <div class="flex flex-col items-center justify-center py-20 text-gray-400">
-            <i class="fas fa-spinner fa-spin text-3xl mb-2"></i>
-            <p id="loading-text">正在從試算表同步行程...</p>
-        </div>
-    </main>
-
-    <button onclick="window.scrollTo({top:0, behavior:'smooth'})" class="fixed bottom-6 right-6 w-12 h-12 bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center transition active:scale-90">
-        <i class="fas fa-chevron-up"></i>
-    </button>
-
-    <script>
-        // ==========================================
-        // 1. 設定區：請在此放入你的 CSV 連結
-        // ==========================================
-        const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQvJrfnAiYw3-NvbrcoKJeZZiwv981LT-dibEqvirgdfJZbXSEk5bS-KVsUaW2AuDS3K6F0uKK3Vg-E/pub?output=csv'; 
-
-        // 2. 初始化天數導覽按鈕
-        const nav = document.getElementById('day-nav');
-        for (let i = 1; i <= 8; i++) {
-            nav.innerHTML += `
-                <a href="#day${i}" class="flex-none px-5 py-2 rounded-full bg-slate-100 text-slate-600 font-bold text-sm active:bg-blue-600 active:text-white transition">
-                    Day ${i}
-                </a>`;
-        }
-
-        // 3. 核心功能：抓取資料
-        async function loadData() {
-            const container = document.getElementById('itinerary-content');
-            try {
-                // 檢查連結是否有效
-                if (!SHEET_CSV_URL.startsWith('http')) {
-                    throw new Error("尚未設定正確的 CSV 連結。");
-                }
-
-                const response = await fetch(SHEET_CSV_URL);
-                if (!response.ok) throw new Error("讀取失敗，請確認試算表是否已『發佈到網路』。");
-
-                const csvData = await response.text();
-                const rows = parseCSV(csvData);
-                
-                if (rows.length === 0) throw new Error("試算表中沒有找到行程資料。");
-
-                renderItinerary(rows);
-                localStorage.setItem('japanTripData', JSON.stringify(rows));
-
-            } catch (error) {
-                console.error(error);
-                // 嘗試讀取快取
-                const cachedData = localStorage.getItem('japanTripData');
-                if (cachedData) {
-                    renderItinerary(JSON.parse(cachedData));
-                } else {
-                    container.innerHTML = `
-                        <div class="bg-red-50 border-l-4 border-red-500 p-4 mt-10">
-                            <p class="text-red-700 font-bold">❌ 同步失敗</p>
-                            <p class="text-red-600 text-sm mt-1">${error.message}</p>
-                            <p class="text-xs text-gray-400 mt-4 underline" onclick="location.reload()">點此重試</p>
-                        </div>`;
-                }
-            }
-        }
-
-        // 4. 解析 CSV 資料
-        function parseCSV(csv) {
-            const lines = csv.split('\n').filter(line => line.trim() !== '');
-            return lines.slice(1).map(line => {
-                const values = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                return {
-                    day: values[0]?.replace(/"/g, '').trim(),
-                    time: values[1]?.replace(/"/g, '').trim(),
-                    title: values[2]?.replace(/"/g, '').trim(),
-                    location: values[3]?.replace(/"/g, '').trim(),
-                    note: values[4]?.replace(/"/g, '').trim(),
-                    url: values[5]?.replace(/"/g, '').trim(),
-                    mapUrl: values[6]?.replace(/"/g, '').trim()
-                };
-            });
-        }
-
-        // 5. 繪製行程 HTML
-        function renderItinerary(data) {
-            const container = document.getElementById('itinerary-content');
-            container.innerHTML = '';
-
-            for (let d = 1; d <= 8; d++) {
-                const dayData = data.filter(item => item.day == d);
-                if (dayData.length === 0) continue;
-
-                let daySection = `
-                <section id="day${d}" class="mb-10 day-card">
-                    <h2 class="text-2xl font-black text-slate-800 mb-5 flex items-center">
-                        <span class="bg-blue-600 text-white px-3 py-1 rounded-lg mr-2 text-base shadow-sm">D${d}</span>
-                        Day ${d}
-                    </h2>
-                    <div class="ml-3 timeline-border pl-6 space-y-6">`;
-
-                dayData.forEach(item => {
-                    // 自動生成 Google Map 連結，如果原本沒填的話
-                    const mapLink = item.mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.location || item.title)}`;
-                    
-                    daySection += `
-                    <div class="relative">
-                        <div class="absolute -left-[33px] top-1.5 w-4 h-4 rounded-full bg-blue-600 border-4 border-white shadow-sm"></div>
-                        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 active:bg-slate-50 transition">
-                            <div class="flex justify-between items-center mb-1 text-blue-600 font-bold text-sm italic">
-                                <span><i class="far fa-clock mr-1"></i> ${item.time}</span>
-                            </div>
-                            <h3 class="text-lg font-bold text-slate-800">${item.title}</h3>
-                            <p class="text-sm text-slate-500 mt-1"><i class="fas fa-location-dot mr-1 text-red-400"></i> ${item.location}</p>
-                            
-                            ${item.note ? `
-                            <div class="mt-3 text-sm text-slate-600 bg-slate-50 p-3 rounded-xl border-l-4 border-slate-200 leading-relaxed">
-                                <strong>備註：</strong>${item.note}
-                            </div>` : ''}
-                            
-                            <div class="mt-4 flex gap-2">
-                                <a href="${mapLink}" target="_blank" class="flex-1 bg-blue-600 text-white text-center py-3 rounded-xl text-xs font-bold active:bg-blue-700 transition shadow-sm">
-                                    <i class="fas fa-map-marked-alt mr-1"></i> 開啟地圖
-                                </a>
-                                ${item.url ? `
-                                <a href="${item.url}" target="_blank" class="flex-1 bg-white border border-slate-200 text-slate-700 text-center py-3 rounded-xl text-xs font-bold active:bg-slate-100">
-                                    <i class="fas fa-link mr-1"></i> 詳細資料
-                                </a>` : ''}
-                            </div>
-                        </div>
-                    </div>`;
-                });
-
-                daySection += `</div></section>`;
-                container.innerHTML += daySection;
-            }
-        }
-
-        // 執行載入
-        loadData();
-    </script>
-</body>
-</html>
+<div class="header-static" id="topSection">
+    <div id="offline-status">離線模式：顯示快取資料</div>
+    <div class="trip-main-info"><h1>日本8日遊行程</h1></div>
+    <div class="top-info-bar">
+        <div class="info-row"><span class="info-label">日期：</span><span id="display-date">-</span></div>
+        <div class="info-row"><span class="info-label">住宿地點：</span><span id="display-stay">-</span></div>
+    </div>
+</div>
